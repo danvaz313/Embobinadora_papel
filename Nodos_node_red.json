@@ -1,0 +1,240 @@
+[
+    {
+        "id": "7488966e07ccd276",
+        "type": "tab",
+        "label": "Flujo 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "374a0dbaf974ea6a",
+        "type": "s7 in",
+        "z": "7488966e07ccd276",
+        "endpoint": "5d67ac8c026f4401",
+        "mode": "all",
+        "variable": "Frecuencia",
+        "diff": true,
+        "name": "frecuencia",
+        "x": 155,
+        "y": 340,
+        "wires": [
+            [
+                "e620cfd2745a9d6e",
+                "8ffbf31f6fb4e07b"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "e620cfd2745a9d6e",
+        "type": "function",
+        "z": "7488966e07ccd276",
+        "name": "function 16",
+        "func": "if (msg.payload) {\n    // Verifica y ajusta cada propiedad según sea necesario\n    msg.payload = {\n        Frecuencia: (msg.payload.Frecuencia || 0) / 100, // Divide Frecuencia entre 100\n        \"Corriente de salida\": (msg.payload[\"Corriente de salida\"] || 0) / 100, // Divide Corriente de salida entre 100\n        \"Voltaje de salida\": (msg.payload[\"Voltaje de salida\"] || 0) / 1000, // Divide Voltaje de salida entre 1000\n        \"DC-BUS Voltaje \": msg.payload[\"DC-BUS Voltaje \"] // Deja este valor igual\n    };\n} else {\n    msg.payload = \"Error: Los datos no son válidos.\";\n}\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 280,
+        "wires": [
+            [
+                "cbfb7110885868df",
+                "81efcb4905099e74",
+                "deaa0dc87fc752df"
+            ]
+        ]
+    },
+    {
+        "id": "cbfb7110885868df",
+        "type": "mqtt out",
+        "z": "7488966e07ccd276",
+        "name": "",
+        "topic": "plc-datos",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "10da45ccec99a63b",
+        "x": 640,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "81efcb4905099e74",
+        "type": "debug",
+        "z": "7488966e07ccd276",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "8ffbf31f6fb4e07b",
+        "type": "function",
+        "z": "7488966e07ccd276",
+        "name": "function 17",
+        "func": "if (msg.payload) {\n    // Verifica y ajusta cada propiedad según sea necesario\n        var query = `INSERT INTO Mediciones (Frecuencia, Corriente, Voltaje_out, Voltaje_Bus) VALUES(${msg.payload.Frecuencia}, ${msg.payload[\"Corriente de salida\"]}, ${msg.payload[\"Voltaje de salida\"]}, ${msg.payload[\"DC-BUS Voltaje \"]});`;\n };\n\nmsg.topic = query; if (msg.payload) {\n    // Verifica y ajusta cada propiedad según sea necesario\n    var query = `INSERT INTO Mediciones (Frecuencia, Corriente, Voltaje_out, Voltaje_Bus) \n                 VALUES(${msg.payload.Frecuencia || 0}, \n                        ${msg.payload[\"Corriente de salida\"] || 0}, \n                        ${msg.payload[\"Voltaje de salida\"] || 0}, \n                        ${msg.payload[\"DC-BUS Voltaje \"] || 0});`;\n\n    msg.topic = query; // Asigna el query a msg.topic\n} else {\n    msg.topic = \"Error: Datos no válidos\"; // Manejo de errores en caso de que no haya payload\n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 160,
+        "wires": [
+            [
+                "cb31588c28046042"
+            ]
+        ]
+    },
+    {
+        "id": "cb31588c28046042",
+        "type": "mysql",
+        "z": "7488966e07ccd276",
+        "mydb": "ed6f1c66d322cce2",
+        "name": "BD",
+        "x": 690,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "deaa0dc87fc752df",
+        "type": "ubidots_out",
+        "z": "7488966e07ccd276",
+        "name": "",
+        "token": "BBUS-sEssiHR5rDViA7GD095zBSpuTDHMJo",
+        "label_device": "",
+        "device_label": "plc",
+        "tier": "business",
+        "tls_checkbox": true,
+        "x": 490,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "0c3c49a2853ee7e3",
+        "type": "ui_spacer",
+        "z": "7488966e07ccd276",
+        "name": "spacer",
+        "group": "b9a1efdb94a164ba",
+        "order": 6,
+        "width": "4",
+        "height": "4"
+    },
+    {
+        "id": "5d67ac8c026f4401",
+        "type": "s7 endpoint",
+        "transport": "iso-on-tcp",
+        "address": "192.168.0.1",
+        "port": "102",
+        "rack": "0",
+        "slot": "1",
+        "localtsaphi": "01",
+        "localtsaplo": "00",
+        "remotetsaphi": "01",
+        "remotetsaplo": "00",
+        "connmode": "rack-slot",
+        "adapter": "",
+        "busaddr": "2",
+        "cycletime": "1000",
+        "timeout": "2000",
+        "name": "",
+        "vartable": [
+            {
+                "addr": "DB1,INT4",
+                "name": "Frecuencia"
+            },
+            {
+                "addr": "DB1,INT6",
+                "name": "Corriente de salida"
+            },
+            {
+                "addr": "DB1,INT10",
+                "name": "DC-BUS Voltaje "
+            },
+            {
+                "addr": "DB1,INT8",
+                "name": "Voltaje de salida"
+            }
+        ]
+    },
+    {
+        "id": "10da45ccec99a63b",
+        "type": "mqtt-broker",
+        "name": "HIVE",
+        "broker": "fea24fa4d4db43a7a9f1e421dbb80971.s1.eu.hivemq.cloud",
+        "port": "8883",
+        "tls": "",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "ed6f1c66d322cce2",
+        "type": "MySQLdatabase",
+        "name": "BD",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "DATA_PLC",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "b9a1efdb94a164ba",
+        "type": "ui_group",
+        "name": "Sensor2",
+        "tab": "a65006b4a1b6dbf7",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "a65006b4a1b6dbf7",
+        "type": "ui_tab",
+        "name": "Sensor_IET701",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
